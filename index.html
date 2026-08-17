@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>초고-수정고 표현 변경 감지기 v6</title>
+<title>초고-수정고 표현 변경 감지기 v7</title>
 <style>
   :root {
     --bg-primary: #f8fafc;
@@ -79,7 +79,7 @@
   }
 
   .btn {
-    padding: 8px 16px;
+    padding: 7px 14px;
     border-radius: 6px;
     border: none;
     font-size: 13px;
@@ -95,6 +95,27 @@
   }
   .btn-secondary:hover {
     background-color: #e2e8f0;
+  }
+
+  /* 각 창 헤더 전용 비우기 버튼 */
+  .btn-clear-pane {
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn-clear-pane:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fca5a5;
   }
 
   .slider-container {
@@ -141,7 +162,7 @@
   }
 
   .pane-header {
-    padding: 12px 16px;
+    padding: 10px 16px;
     background: #f8fafc;
     border-bottom: 1px solid var(--border-color);
     font-size: 14px;
@@ -150,6 +171,18 @@
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
+  }
+
+  .pane-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pane-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .pane-body {
@@ -197,7 +230,7 @@
     display: block;
   }
 
-  /* 스크롤바 미려한 스타일 */
+  /* 스크롤바 */
   .editor::-webkit-scrollbar {
     width: 8px;
   }
@@ -261,7 +294,7 @@
   <div class="controls">
     <div class="controls-group">
       <button class="btn btn-secondary" onclick="loadSample()">예제 텍스트 넣기</button>
-      <button class="btn btn-secondary" onclick="clearAll()">초기화</button>
+      <button class="btn btn-secondary" onclick="clearAll()">전체 초기화</button>
     </div>
 
     <div class="controls-group">
@@ -283,8 +316,12 @@
     <!-- 왼쪽 창: 초고 (A) -->
     <div class="pane">
       <div class="pane-header">
-        <span>A. 초고 (원본)</span>
-        <span style="font-size: 12px; color: var(--text-muted);">원래 작성한 글 붙여넣기</span>
+        <div class="pane-header-title">
+          <span>A. 초고 (원본)</span>
+        </div>
+        <div class="pane-header-actions">
+          <button class="btn-clear-pane" onclick="clearPaneA()" title="A창 내용만 비우기">✕ A 비우기</button>
+        </div>
       </div>
       <div class="pane-body">
         <textarea id="textA" class="editor" placeholder="초고 내용을 여기에 붙여넣으세요..." oninput="runComparison()"></textarea>
@@ -294,8 +331,12 @@
     <!-- 오른쪽 창: 수정고 (B) -->
     <div class="pane">
       <div class="pane-header">
-        <span>B. 수정고</span>
-        <span style="font-size: 12px; color: var(--text-muted);">붙여넣거나 바로 타이핑 가능</span>
+        <div class="pane-header-title">
+          <span>B. 수정고</span>
+        </div>
+        <div class="pane-header-actions">
+          <button class="btn-clear-pane" onclick="clearPaneB()" title="B창 내용만 비우기">✕ B 비우기</button>
+        </div>
       </div>
       <div class="pane-body">
         <div id="textB" class="editor" contenteditable="true" placeholder="수정고 내용을 여기에 붙여넣거나 입력하세요..." oninput="onBInput()" onpaste="onBPaste(event)"></div>
@@ -519,6 +560,28 @@ function updateThresholdLabel(val) {
   document.getElementById("thresholdVal").textContent = val;
 }
 
+// A창만 비우기
+function clearPaneA() {
+  document.getElementById("textA").value = "";
+  runComparison();
+  document.getElementById("textA").focus();
+}
+
+// B창만 비우기
+function clearPaneB() {
+  const bElem = document.getElementById("textB");
+  bElem.innerHTML = "";
+  runComparison();
+  bElem.focus();
+}
+
+// 전체 초기화
+function clearAll() {
+  document.getElementById("textA").value = "";
+  document.getElementById("textB").innerHTML = "";
+  document.getElementById("diffStats").style.display = "none";
+}
+
 function loadSample() {
   const sampleA = `진은 몸서리쳤다. 제게서 풍기는 악취를 낱낱이 들이켤 만큼 그가 가까이 다가와 있는 것도 싫었고, 땀과 열기로 엉망이 된 얼굴이 황태자에게 홀딱 빠진 숙맥처럼 보이는 것도 끔찍했다.
 "아니면 그냥 사람을 갖고 노는 걸 좋아하나?"
@@ -536,12 +599,6 @@ function loadSample() {
   document.getElementById("textA").value = sampleA;
   document.getElementById("textB").innerText = sampleB;
   runComparison();
-}
-
-function clearAll() {
-  document.getElementById("textA").value = "";
-  document.getElementById("textB").innerHTML = "";
-  document.getElementById("diffStats").style.display = "none";
 }
 
 window.onload = function() {
