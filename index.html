@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>초고-수정고 표현 변경 감지기 v7</title>
+<title>초고-수정고 표현 변경 감지기 v9</title>
 <style>
   :root {
     --bg-primary: #f8fafc;
@@ -20,29 +20,17 @@
     --delete-border: #cbd5e1;
   }
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-primary);
     color: var(--text-main);
-    line-height: 1.6;
+    line-height: 1.85;
     padding: 24px;
   }
 
-  .container {
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  header {
-    margin-bottom: 20px;
-  }
-
+  .container { max-width: 1400px; margin: 0 auto; }
+  header { margin-bottom: 20px; }
   header h1 {
     font-size: 22px;
     font-weight: 700;
@@ -51,12 +39,7 @@
     align-items: center;
     gap: 8px;
   }
-
-  header p {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
+  header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 
   .controls {
     display: flex;
@@ -71,12 +54,7 @@
     gap: 12px;
   }
 
-  .controls-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-  }
+  .controls-group { display: flex; align-items: center; gap: 12px; font-size: 13px; }
 
   .btn {
     padding: 7px 14px;
@@ -87,17 +65,13 @@
     cursor: pointer;
     transition: all 0.15s ease;
   }
-
   .btn-secondary {
     background-color: #f1f5f9;
     color: #334155;
     border: 1px solid var(--border-color);
   }
-  .btn-secondary:hover {
-    background-color: #e2e8f0;
-  }
+  .btn-secondary:hover { background-color: #e2e8f0; }
 
-  /* 각 창 헤더 전용 비우기 버튼 */
   .btn-clear-pane {
     padding: 3px 8px;
     font-size: 11px;
@@ -118,15 +92,8 @@
     border-color: #fca5a5;
   }
 
-  .slider-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-muted);
-  }
-  .slider-container input[type="range"] {
-    width: 110px;
-  }
+  .slider-container { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+  .slider-container input[type="range"] { width: 110px; }
 
   .toggle-container {
     display: flex;
@@ -143,12 +110,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
-
-  @media (max-width: 768px) {
-    .grid {
-      grid-template-columns: 1fr;
-    }
-  }
+  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
 
   .pane {
     background: var(--card-bg);
@@ -157,7 +119,7 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     display: flex;
     flex-direction: column;
-    height: 660px;
+    height: 680px;
     overflow: hidden;
   }
 
@@ -173,18 +135,6 @@
     flex-shrink: 0;
   }
 
-  .pane-header-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .pane-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
   .pane-body {
     flex: 1 1 0;
     min-height: 0;
@@ -193,19 +143,18 @@
     overflow: hidden;
   }
 
-  /* 에디터 공통 스타일 */
   .editor {
     width: 100%;
     height: 100%;
     border: none;
     padding: 16px;
     font-size: 15px;
-    line-height: 1.8;
+    line-height: 1.85;
     font-family: inherit;
     outline: none;
     overflow-y: auto !important;
     overflow-x: hidden;
-    white-space: pre-wrap;
+    white-space: pre-wrap !important;
     word-break: break-word;
     box-sizing: border-box;
   }
@@ -217,35 +166,28 @@
     display: block;
   }
 
-  div.editor[contenteditable="true"] {
+  /* B창 뷰어 */
+  div.editor-viewer {
     background: #ffffff;
     color: var(--text-main);
     display: block;
+    user-select: text;
+    cursor: text;
   }
 
-  div.editor[contenteditable="true"]:empty:before {
-    content: attr(placeholder);
+  div.editor-viewer:empty:before {
+    content: attr(data-placeholder);
     color: #94a3b8;
     pointer-events: none;
     display: block;
   }
 
-  /* 스크롤바 */
-  .editor::-webkit-scrollbar {
-    width: 8px;
-  }
-  .editor::-webkit-scrollbar-track {
-    background: #f1f5f9;
-  }
-  .editor::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-  }
-  .editor::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-  }
+  .editor::-webkit-scrollbar { width: 8px; }
+  .editor::-webkit-scrollbar-track { background: #f1f5f9; }
+  .editor::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .editor::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-  /* 변경/추가된 표현 하이라이트 */
+  /* diff highlights */
   .diff-expr {
     background-color: var(--highlight-bg);
     color: var(--highlight-color);
@@ -257,9 +199,9 @@
     text-decoration-color: var(--highlight-color);
     text-underline-offset: 3px;
     margin: 0 1px;
+    display: inline;
   }
 
-  /* 삭제된 초고 표현 */
   .diff-deleted {
     background-color: var(--delete-bg);
     color: var(--delete-color);
@@ -271,6 +213,7 @@
     margin: 0 2px;
     font-weight: 400;
     user-select: none;
+    display: inline;
   }
 
   .badge {
@@ -288,7 +231,7 @@
 <div class="container">
   <header>
     <h1><span>✍️</span> 초고 - 수정고 단어/표현 비교기</h1>
-    <p>A창과 B창에 글을 붙여넣으면 <strong>B창에 즉시 타이핑·편집 가능하면서도 붉은색 표시가 실시간 유지</strong>됩니다.</p>
+    <p>A창과 B창에 글을 붙여넣으면 <strong>문단/줄바꿈 훼손 없이 100% 원본 그대로 유지</strong>하며 변경된 표현만 붉은색으로 비교합니다.</p>
   </header>
 
   <div class="controls">
@@ -316,12 +259,8 @@
     <!-- 왼쪽 창: 초고 (A) -->
     <div class="pane">
       <div class="pane-header">
-        <div class="pane-header-title">
-          <span>A. 초고 (원본)</span>
-        </div>
-        <div class="pane-header-actions">
-          <button class="btn-clear-pane" onclick="clearPaneA()" title="A창 내용만 비우기">✕ A 비우기</button>
-        </div>
+        <span>A. 초고 (원본)</span>
+        <button class="btn-clear-pane" onclick="clearPaneA()" title="A창 내용만 비우기">✕ A 비우기</button>
       </div>
       <div class="pane-body">
         <textarea id="textA" class="editor" placeholder="초고 내용을 여기에 붙여넣으세요..." oninput="runComparison()"></textarea>
@@ -331,15 +270,11 @@
     <!-- 오른쪽 창: 수정고 (B) -->
     <div class="pane">
       <div class="pane-header">
-        <div class="pane-header-title">
-          <span>B. 수정고</span>
-        </div>
-        <div class="pane-header-actions">
-          <button class="btn-clear-pane" onclick="clearPaneB()" title="B창 내용만 비우기">✕ B 비우기</button>
-        </div>
+        <span>B. 수정고 (비교 결과)</span>
+        <button class="btn-clear-pane" onclick="clearPaneB()" title="B창 내용만 비우기">✕ B 비우기</button>
       </div>
       <div class="pane-body">
-        <div id="textB" class="editor" contenteditable="true" placeholder="수정고 내용을 여기에 붙여넣거나 입력하세요..." oninput="onBInput()" onpaste="onBPaste(event)"></div>
+        <div id="textB" class="editor editor-viewer" tabindex="0" data-placeholder="수정고 내용을 복사한 뒤 여기에 붙여넣기(Cmd+V)하세요..." onpaste="onBPaste(event)"></div>
       </div>
     </div>
   </div>
@@ -348,6 +283,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
 
 <script>
+// 원본 순수 B 텍스트 저장용 전역 변수
+let rawTextB = "";
+
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 const JUNG = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
 const JONG = ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
@@ -378,11 +316,7 @@ function levenshtein(a, b) {
       if (b.charAt(i - 1) === a.charAt(j - 1)) {
         matrix[i][j] = matrix[i - 1][j - 1];
       } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1
-        );
+        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
       }
     }
   }
@@ -392,38 +326,20 @@ function levenshtein(a, b) {
 function getJamoSimilarity(strA, strB) {
   const cleanA = strA.replace(/[^가-힣a-zA-Z0-9]/g, "");
   const cleanB = strB.replace(/[^가-힣a-zA-Z0-9]/g, "");
-  
   if (cleanA === cleanB) return 1.0;
   if (!cleanA || !cleanB) return 0.0;
-
   const jamoA = decomposeHangul(cleanA);
   const jamoB = decomposeHangul(cleanB);
-  
   const dist = levenshtein(jamoA, jamoB);
-  const maxLen = Math.max(jamoA.length, jamoB.length);
-  return 1 - (dist / maxLen);
+  return 1 - (dist / Math.max(jamoA.length, jamoB.length));
 }
 
 function escapeHtml(text) {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function getRawTextB() {
-  const bElem = document.getElementById("textB");
-  const clone = bElem.cloneNode(true);
-  const deletedElements = clone.querySelectorAll(".diff-deleted");
-  deletedElements.forEach(el => el.remove());
-  return clone.innerText || clone.textContent || "";
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 function runComparison() {
-  const textA = document.getElementById("textA").value;
-  const rawTextB = getRawTextB();
+  const textA = document.getElementById("textA").value.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const bElem = document.getElementById("textB");
   const threshold = parseFloat(document.getElementById("threshold").value);
   const showDeleted = document.getElementById("showDeleted").checked;
@@ -451,7 +367,7 @@ function runComparison() {
   let i = 0;
   while (i < diffs.length) {
     const [op, text] = diffs[i];
-    if (op === 0) { // EQUAL
+    if (op === 0) {
       grouped.push({ type: 'equal', text: text });
       i++;
     } else {
@@ -462,14 +378,9 @@ function runComparison() {
         if (diffs[i][0] === 1) insText += diffs[i][1];
         i++;
       }
-
-      if (delText && insText) {
-        grouped.push({ type: 'replace', oldText: delText, newText: insText });
-      } else if (delText) {
-        grouped.push({ type: 'delete_only', text: delText });
-      } else if (insText) {
-        grouped.push({ type: 'insert_only', text: insText });
-      }
+      if (delText && insText) grouped.push({ type: 'replace', oldText: delText, newText: insText });
+      else if (delText) grouped.push({ type: 'delete_only', text: delText });
+      else if (insText) grouped.push({ type: 'insert_only', text: insText });
     }
   }
 
@@ -492,7 +403,7 @@ function runComparison() {
       if (cleanDel.length > 0) {
         deleteCount++;
         if (showDeleted) {
-          html += `<span class="diff-deleted" contenteditable="false" title="초고에서 삭제됨">${escapeHtml(item.text.trim())}</span>`;
+          html += `<span class="diff-deleted" title="초고에서 삭제됨">${escapeHtml(item.text.trim())}</span>`;
         }
       }
     } else if (item.type === 'replace') {
@@ -513,7 +424,7 @@ function runComparison() {
         if (cleanOld.length > 0) {
           deleteCount++;
           if (showDeleted) {
-            html += `<span class="diff-deleted" contenteditable="false" title="초고에서 삭제됨">${escapeHtml(oldStr.trim())}</span>`;
+            html += `<span class="diff-deleted" title="초고에서 삭제됨">${escapeHtml(oldStr.trim())}</span>`;
           }
         }
 
@@ -541,42 +452,33 @@ function runComparison() {
   }
 }
 
+// B창 붙여넣기: 클립보드 순수 텍스트를 바로 변수에 저장 후 비교 렌더링 (줄바꿈 100% 보존)
 function onBPaste(e) {
   e.preventDefault();
   const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-  document.execCommand('insertText', false, text);
+  rawTextB = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   runComparison();
-}
-
-let debounceTimer = null;
-function onBInput() {
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
-    runComparison();
-  }, 400);
 }
 
 function updateThresholdLabel(val) {
   document.getElementById("thresholdVal").textContent = val;
 }
 
-// A창만 비우기
 function clearPaneA() {
   document.getElementById("textA").value = "";
   runComparison();
   document.getElementById("textA").focus();
 }
 
-// B창만 비우기
 function clearPaneB() {
-  const bElem = document.getElementById("textB");
-  bElem.innerHTML = "";
+  rawTextB = "";
+  document.getElementById("textB").innerHTML = "";
   runComparison();
-  bElem.focus();
+  document.getElementById("textB").focus();
 }
 
-// 전체 초기화
 function clearAll() {
+  rawTextB = "";
   document.getElementById("textA").value = "";
   document.getElementById("textB").innerHTML = "";
   document.getElementById("diffStats").style.display = "none";
@@ -584,8 +486,11 @@ function clearAll() {
 
 function loadSample() {
   const sampleA = `진은 몸서리쳤다. 제게서 풍기는 악취를 낱낱이 들이켤 만큼 그가 가까이 다가와 있는 것도 싫었고, 땀과 열기로 엉망이 된 얼굴이 황태자에게 홀딱 빠진 숙맥처럼 보이는 것도 끔찍했다.
+
 "아니면 그냥 사람을 갖고 노는 걸 좋아하나?"
+
 진의 눈동자가 번뜩 뜨였다. 터무니 없는 모함에 미간이 절로 찌푸려졌다. 도대체 왜 그렇게 생각하는지 이해할 수 없어 기가 찬 눈으로 쏘아보았다. 하지만 그의 시선은 붉어진 진의 귓불에서 떨어지지 않았다.
+
 진의 눈앞에 보이는 단단한 그의 목줄기에선 마치 무언가에 졸리기라도 한 듯, 억눌린 목소리가 비져나왔다.`;
 
   const sampleB = `진은 몸서리쳤다. 제게서 풍기는 악취를 낱낱이 들이켤 만큼 그가 가까이 다가와 있는 것도 싫었고, 땀과 열기로 엉망이 된 얼굴이 황태자에게 홀딱 빠진 숙맥처럼 보이는 것도 끔찍했다.
@@ -597,7 +502,7 @@ function loadSample() {
 자신을 모욕하는 시선에 진이 반박하려 입술을 달싹인 순간, 눈앞에 보이는 단단한 그의 목줄기에선 마치 무언가에 졸리기라도 한 듯, 억눌린 목소리가 비져나왔다.`;
 
   document.getElementById("textA").value = sampleA;
-  document.getElementById("textB").innerText = sampleB;
+  rawTextB = sampleB;
   runComparison();
 }
 
