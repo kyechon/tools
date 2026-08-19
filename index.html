@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>초고-수정고 표현 변경 감지기 v9</title>
+<title>초고-수정고 표현 변경 감지기 v10</title>
 <style>
   :root {
     --bg-primary: #f8fafc;
@@ -72,11 +72,11 @@
   }
   .btn-secondary:hover { background-color: #e2e8f0; }
 
-  .btn-clear-pane {
+  /* 각 창 헤더 버튼들 */
+  .btn-header {
     padding: 3px 8px;
     font-size: 11px;
     font-weight: 600;
-    color: #64748b;
     background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 4px;
@@ -86,10 +86,25 @@
     align-items: center;
     gap: 4px;
   }
+  
+  .btn-clear-pane {
+    color: #64748b;
+  }
   .btn-clear-pane:hover {
     background: #fee2e2;
     color: #dc2626;
     border-color: #fca5a5;
+  }
+
+  .btn-copy-pane {
+    color: #2563eb;
+    border-color: #bfdbfe;
+    background: #eff6ff;
+  }
+  .btn-copy-pane:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #93c5fd;
   }
 
   .slider-container { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
@@ -133,6 +148,12 @@
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
+  }
+
+  .pane-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .pane-body {
@@ -187,7 +208,7 @@
   .editor::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   .editor::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-  /* diff highlights */
+  /* diff highlights with inline styles guaranteed */
   .diff-expr {
     background-color: var(--highlight-bg);
     color: var(--highlight-color);
@@ -260,7 +281,9 @@
     <div class="pane">
       <div class="pane-header">
         <span>A. 초고 (원본)</span>
-        <button class="btn-clear-pane" onclick="clearPaneA()" title="A창 내용만 비우기">✕ A 비우기</button>
+        <div class="pane-header-actions">
+          <button class="btn-header btn-clear-pane" onclick="clearPaneA()" title="A창 내용만 비우기">✕ A 비우기</button>
+        </div>
       </div>
       <div class="pane-body">
         <textarea id="textA" class="editor" placeholder="초고 내용을 여기에 붙여넣으세요..." oninput="runComparison()"></textarea>
@@ -271,7 +294,10 @@
     <div class="pane">
       <div class="pane-header">
         <span>B. 수정고 (비교 결과)</span>
-        <button class="btn-clear-pane" onclick="clearPaneB()" title="B창 내용만 비우기">✕ B 비우기</button>
+        <div class="pane-header-actions">
+          <button id="btnCopyB" class="btn-header btn-copy-pane" onclick="copyFormattedB()" title="붉은색/취소선 서식 그대로 복사">📋 복사하기</button>
+          <button class="btn-header btn-clear-pane" onclick="clearPaneB()" title="B창 내용만 비우기">✕ B 비우기</button>
+        </div>
       </div>
       <div class="pane-body">
         <div id="textB" class="editor editor-viewer" tabindex="0" data-placeholder="수정고 내용을 복사한 뒤 여기에 붙여넣기(Cmd+V)하세요..." onpaste="onBPaste(event)"></div>
@@ -283,7 +309,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
 
 <script>
-// 원본 순수 B 텍스트 저장용 전역 변수
 let rawTextB = "";
 
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
@@ -395,7 +420,7 @@ function runComparison() {
       if (item.text.trim() === "") {
         html += escapeHtml(item.text);
       } else {
-        html += `<span class="diff-expr">${escapeHtml(item.text)}</span>`;
+        html += `<span class="diff-expr" style="background-color:#fee2e2; color:#dc2626; font-weight:bold; text-decoration:underline; padding:2px 4px; border-radius:4px; border:1px solid #fca5a5;">${escapeHtml(item.text)}</span>`;
         highlightCount++;
       }
     } else if (item.type === 'delete_only') {
@@ -403,7 +428,7 @@ function runComparison() {
       if (cleanDel.length > 0) {
         deleteCount++;
         if (showDeleted) {
-          html += `<span class="diff-deleted" title="초고에서 삭제됨">${escapeHtml(item.text.trim())}</span>`;
+          html += `<span class="diff-deleted" style="background-color:#f1f5f9; color:#64748b; text-decoration:line-through; padding:2px 4px; border-radius:4px; border:1px dashed #cbd5e1;">${escapeHtml(item.text.trim())}</span>`;
         }
       }
     } else if (item.type === 'replace') {
@@ -424,13 +449,13 @@ function runComparison() {
         if (cleanOld.length > 0) {
           deleteCount++;
           if (showDeleted) {
-            html += `<span class="diff-deleted" title="초고에서 삭제됨">${escapeHtml(oldStr.trim())}</span>`;
+            html += `<span class="diff-deleted" style="background-color:#f1f5f9; color:#64748b; text-decoration:line-through; padding:2px 4px; border-radius:4px; border:1px dashed #cbd5e1;">${escapeHtml(oldStr.trim())}</span>`;
           }
         }
 
         const cleanNew = newStr.replace(/[\s\p{P}]/gu, "");
         if (cleanNew.length > 0) {
-          html += `<span class="diff-expr">${escapeHtml(newStr)}</span>`;
+          html += `<span class="diff-expr" style="background-color:#fee2e2; color:#dc2626; font-weight:bold; text-decoration:underline; padding:2px 4px; border-radius:4px; border:1px solid #fca5a5;">${escapeHtml(newStr)}</span>`;
           highlightCount++;
         } else {
           html += escapeHtml(newStr);
@@ -452,12 +477,58 @@ function runComparison() {
   }
 }
 
-// B창 붙여넣기: 클립보드 순수 텍스트를 바로 변수에 저장 후 비교 렌더링 (줄바꿈 100% 보존)
 function onBPaste(e) {
   e.preventDefault();
   const text = (e.clipboardData || window.clipboardData).getData('text/plain');
   rawTextB = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   runComparison();
+}
+
+// B창의 서식(붉은색, 취소선, 줄바꿈)을 그대로 클립보드에 복사하는 함수
+async function copyFormattedB() {
+  const bElem = document.getElementById("textB");
+  const btn = document.getElementById("btnCopyB");
+  
+  if (!bElem.innerHTML || bElem.innerHTML.trim() === "") {
+    alert("복사할 B창 내용이 없습니다.");
+    return;
+  }
+
+  // HTML 클립보드 데이터 생성 (Scrivener, 노션, 워드, 메일 등에 붙여넣을 때 서식 유지)
+  const htmlContent = `<div style="font-family:-apple-system, BlinkMacSystemFont, sans-serif; line-height:1.85; white-space:pre-wrap;">${bElem.innerHTML}</div>`;
+  const plainText = bElem.innerText || bElem.textContent;
+
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      const blobHtml = new Blob([htmlContent], { type: "text/html" });
+      const blobText = new Blob([plainText], { type: "text/plain" });
+      const data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobText })];
+      await navigator.clipboard.write(data);
+    } else {
+      // 구형 브라우저 폴백
+      const range = document.createRange();
+      range.selectNode(bElem);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      document.execCommand("copy");
+      window.getSelection().removeAllRanges();
+    }
+
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "✅ 복사 완료!";
+    btn.style.background = "#dcfce7";
+    btn.style.color = "#15803d";
+    btn.style.borderColor = "#86efac";
+
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.style.background = "#eff6ff";
+      btn.style.color = "#2563eb";
+      btn.style.borderColor = "#bfdbfe";
+    }, 1500);
+  } catch (err) {
+    alert("복사에 실패했습니다: " + err.message);
+  }
 }
 
 function updateThresholdLabel(val) {
